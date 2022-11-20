@@ -1,0 +1,4 @@
+A008,Carton Corrugado Plastico 20%,15,157.99
+A009,TPU Celular Samsung S12,1500,1255.23
+A010,Botella Plastica 500ml,12450,23.45
+A012,Plancha 2mm poliuretano,15000,23.23

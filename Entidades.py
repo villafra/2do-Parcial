@@ -1,12 +1,12 @@
 
-
-
 class Articulo:
     def __init__(self, codigo, descripcion, stock, costounitario):
         self.Codigo = codigo
         self.Descripcion = descripcion
         self.Stock = stock
         self.CostoUnitario = costounitario
+    def AgregarStock(self, cantidad):
+        self.Stock += cantidad
     def __str__(self):
         return f"{self.Codigo} - {self.Descripcion}"
 
@@ -20,8 +20,8 @@ class Venta:
         self.ImporteVendido = CalcularTotalVenta()
     def CalcularTotalVenta(self):
         return self.CodigoArticulo.CostoUnitario * cantidad
-    def __str__(self) -> str:
-        return f"{self.Fecha} - {self.CodigoArticulo} - {self.ImporteVendido}
+    def __str__(self):
+        return f"{self.Fecha} - {self.CodigoArticulo} - {self.ImporteVendido}"
 
 
 
