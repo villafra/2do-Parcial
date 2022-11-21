@@ -11,17 +11,41 @@ class Articulo:
         return f"{self.Codigo} - {self.Descripcion}"
 
 class Venta:
-    def __init__(self, fecha, codigoarticulo, vendedor, sucursal, cantidad, importevendido):
+    def __init__(self, fecha, codigoarticulo, vendedor, sucursal, cantidad, numerofactura=0):
+        if numerofactura == 0:
+            self.CalcularNumeroFactura()
+        else:
+            self.NumeroFactura = numerofactura
         self.Fecha = fecha
         self.CodigoArticulo = codigoarticulo
         self.Vendedor = vendedor
         self.Sucursal = sucursal
         self.Cantidad = cantidad
-        self.ImporteVendido = CalcularTotalVenta()
-    def CalcularTotalVenta(self):
-        return self.CodigoArticulo.CostoUnitario * cantidad
+        self.CalcularTotalVenta(cantidad)
+    def CalcularTotalVenta(self,cantidad):
+        self.ImporteVendido =  self.CodigoArticulo.CostoUnitario * cantidad
+    def CalcularNumeroFactura(self):
+        try:
+            factura = open("NumeroFactura.dat", "r")
+            for lines in factura:
+                numero = lines.split("-")
+                cabecera = numero[0]
+                cuerpo = int(numero[1])
+                numeracion = int(numero[2])
+            if numeracion == 99999:
+                cuerpo += 1
+                numeracion = 00000;
+            else:
+                numeracion += 1
+            self.NumeroFactura = cabecera + "-" + str(cuerpo).zfill(5) + "-" + str(numeracion).zfill(5)
+            factura.close()
+        except:
+            self.NumeroFactura = "F-00000-00001"
+        finally:
+            factura = open("NumeroFactura.dat","w")
+            factura.write(self.NumeroFactura)
     def __str__(self):
-        return f"{self.Fecha} - {self.CodigoArticulo} - {self.ImporteVendido}"
+        return f"{self.NumeroFactura} - {self.CodigoArticulo.Descripcion}"
 
 
 

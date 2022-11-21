@@ -1,3 +1,4 @@
+from fileinput import close
 import re
 from Entidades import *
 import os
@@ -70,13 +71,14 @@ def MenuVentas():
     print("1-Nueva Venta")
     print("2-Modificar Venta")
     print("3-Eliminar Venta")
-    print("4-Salir")
+    print("4-Ir Al Menu Principal")
     try:
         menu2= int(input())
     except ValueError:
             MenuVentas()
     while menu2 < 5:
         if menu2 == 1:
+            ImprimirArticulos()
             NuevaVenta()
             break
         elif menu2 == 2:
@@ -127,6 +129,7 @@ def AltaArticulo():
             print(f"Se registrado: {NuevoArticulo}")
             MenuArticulos()
         elif opcion == 2:
+            RegistrarArticulo.close()
             print("Se ha cancelado la operacion.")
             MenuArticulos()
         else:
@@ -292,10 +295,179 @@ def AgregarStock():
         MenuArticulos()
 
 def NuevaVenta():
-    pass
-def ModificarVenta():
-    pass
-def EliminarVenta():
-    pass
+    print("Ingrese Codigo de articulo vendido:")
+    codigo = input()
+    articulo = BuscarArticulo(codigo)
+    if not articulo:
+        print("El codigo de articulo no existe en la base de datos. Por favor intente nuevamente.")
+        NuevaVenta()
+    print("Ingrese Cantidad:")
+    try:
+        cantidad = int(input())
+    except ValueError:
+        print("Por favor ingrese cantidad en numeros solamente. Operacion Cancelada.")
+        NuevaVenta()
+    print("Ingrese Nombre de Vendedor:")
+    vendedor = input()
+    print("Ingrese sucursal:")
+    sucursal = input()
+    print("Ingrese Fecha de Venta:")
+    fecha = input()
+    RegistrarVenta = open("ListadoVentas.txt","a")
+    venta = Venta(fecha, articulo, vendedor, sucursal, cantidad)
+    print(f"Se va a registrar: {venta} por un importe de: {round(venta.ImporteVendido,2)}, desea continuar?")
+    print("1-SI")
+    print("2-NO")
+    try:
+        opcion = int(input())
+        if opcion == 1:
+            RegistrarVenta.write(f"{venta.NumeroFactura},{venta.Fecha},{venta.CodigoArticulo.Codigo},{venta.Vendedor},{venta.Sucursal},{venta.Cantidad},{venta.ImporteVendido}\n")
+            RegistrarVenta.close()
+            print(f"Se ha registrado: {venta}")
+            MenuVentas()
+        elif opcion == 2:
+            print("Se ha cancelado la operacion.")
+            RegistrarVenta.close()
+            MenuVentas()
+    except:
+        print("Formato de opcion incorrecto, se cancela la operacion")
+        MenuVentas()
 
+def ModificarListaVentas():
+    try:
+        aux = open("auxVentas.dat","a")
+        for venta in ListadoVentas:
+            aux.write(f"{venta.NumeroFactura},{venta.Fecha},{venta.CodigoArticulo.Codigo},{venta.Vendedor},{venta.Sucursal},{venta.Cantidad},{venta.ImporteVendido}\n")
+        aux.close()
+        os.remove("ListadoVentas.txt")
+        os.rename("auxVentas.dat","ListadoVentas.txt")
+        return True
+    except:
+        return false
+def ModificarVenta():
+    print("Ingrese Numero de Factura a Modificar:")
+    numfac = input()
+    ListadoVentas = ListarVentas()
+    modVenta = BuscarVenta(numfac)
+    if modVenta:
+        print("Ingrese el nuevo dato cuando sea requerido, campo en blanco para mantener el dato actual.")
+        print(f"Numero de factura actual: {modVenta.NumeroFactura}. Ingrese Nuevo Codigo:")
+        nuevonumero = input()
+        if nuevonumero == "":
+            nuevonumero = modVenta.NumeroFactura
+        print(f"Fecha actual: {modVenta.Fecha}. Ingrese Nueva Fecha:")
+        nuevafecha = input()
+        if nuevafecha == "":
+            nuevafecha = modVenta.Fecha
+        print(f"Codigo Articulo actual: {modVenta.CodigoArticulo.Codigo}. Ingrese Nuevo Codigo Articulo:")
+        nuevocodigo = input()
+        if nuevocodigo == "":
+            nuevocodigo = BuscarArticulo(modVenta.CodigoArticulo.Codigo)
+        elif ValidarCodigoArticulo(nuevocodigo):
+            nuevocodigo = BuscarArticulo(nuevocodigo)
+            if not nuevocodigo:
+                print("El Articulo es inexistente.Operacion Cancelada.")
+                ModificarVenta()
+        else:
+            print("El nuevo codigo de articulo no tiene el formato correcto.Operacion cancelada.")
+            ModificarVenta()
+        print(f"Vendedor Actual : {modVenta.Vendedor}. Ingrese nuevo Vendedor:")
+        nuevovendedor = input()
+        if nuevovendedor == "":
+            nuevovendedor = modVenta.Vendedor
+        print(f"Sucursal Actual : {modVenta.Sucursal}. Ingrese nueva Sucursal:")
+        nuevasucursal = input()
+        if nuevasucursal == "":
+            nuevasucursal = modVenta.Sucursal
+        print(f"Cantidad actual: {modVenta.Cantidad}. Ingrese nueva cantidad:")
+        try:
+            nuevacantidad = int(input())
+            modVenta.CalcularTotalVenta(nuevacantidad)
+        except:
+            nuevacantidad = modVenta.Cantidad
+        indice = ListadoVentas.index(modVenta)
+        ListadoVentas[indice].NumeroFactura = nuevonumero
+        ListadoVentas[indice].Fecha = nuevafecha
+        ListadoVentas[indice].CodigoArticulo = nuevocodigo
+        ListadoVentas[indice].Vendedor = nuevovendedor
+        ListadoVentas[indice].Sucursal = nuevasucursal
+        ListadoVentas[indice].Cantidad = nuevacantidad
+        if ModificarListaVentas():
+            print("La venta se ha modificado correctamente.")
+            MenuVentas()
+        else:
+            print("La venta no pudo modificarse, por favor intente nuevamente.")
+            ModificarListaVentas()
+    else:
+        "La factura no existe en la base de datos."
+    MenuVentas()
+
+def BuscarVenta(Numero):
+    DevolverVenta = False
+    Listado = ListarVentas()
+    for venta in Listado:
+        if Numero == venta.NumeroFactura:
+            DevolverVenta = venta
+    return DevolverVenta
+
+def ListarVentas():
+    try:
+        Listado = open("ListadoVentas.txt", "r")
+        ListadoVentas.clear()
+        for venta in Listado:
+            armaventa = venta.split(",")
+            AgregarVenta = Venta(armaventa[1],BuscarArticulo(armaventa[2]),armaventa[3],armaventa[4],int(armaventa[5]),armaventa[0])
+            ListadoVentas.append(AgregarVenta)
+        return ListadoVentas
+    except:
+        return False
+    finally:
+        Listado.close()
+def ImprimirVentas():
+    imprimir = ListarVentas()
+    if imprimir:
+        print("+-----------------+---------------+---------------+---------------+---------------+---------------+---------------+")
+        print("|   Nro Factura   |     Fecha     | Cod. Articulo |    Vendedor   |   Sucursal    |    Cantidad   |    Importe    |")
+        print("+-----------------+---------------+---------------+---------------+---------------+---------------+---------------+")
+        for ventas in imprimir:
+            numfac = ventas.NumeroFactura
+            fecha = ventas.Fecha
+            codigo = ventas.CodigoArticulo.Codigo
+            vendedor = ventas.Vendedor
+            sucursal = ventas.Sucursal
+            cantidad = ventas.Cantidad
+            importe = ventas.ImporteVendido
+            cadena = "| {:<16}| {:<14}| {:<14}| {:<14}| {:<14}| {:<14}| ${:<13}|".format(numfac, fecha, codigo, vendedor,sucursal,cantidad,importe)
+            print(cadena)
+        print("+-----------------+---------------+---------------+---------------+---------------+---------------+---------------+")
+        
+def EliminarVenta():
+    print("Ingrese numero de Factura a Eliminar:")
+    factura = input()
+    ListadoVentas = ListarVentas()
+    killfactura = BuscarVenta(factura)
+    if killfactura:
+        print(f"Esta seguro de borrar {killfactura}?")
+        print("1-SI")
+        print("2-NO")
+        try:
+            opcion = int(input())
+            if opcion == 1:
+                indice = ListadoVentas.index(killfactura)
+                ListadoVentas.pop(indice)
+                if ModificarListaVentas():
+                    print(f"La venta {killfactura} ha sido borrada de la base de datos.")
+                    MenuVentas()
+                else:
+                    print(f"No se pudo borrar la venta {killfactura}. Por favor, intente nuevamente")
+                    EliminarVenta()
+            elif opcion == 2:
+                print("Eliminar venta, cancelado.")
+                MenuVentas()
+            else:
+                print("Solo puede elegir entre 1 o 2")
+                EliminarVenta()
+        except:
+            EliminarVenta()
+ImprimirVentas()
 MenuPrincipal()
