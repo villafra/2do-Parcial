@@ -534,20 +534,6 @@ def OrdenarVentas(lista):
         aux = lista[i]
         lista[i] = lista[min]
         lista[min] = aux
-    print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
-    print("|   Nro Factura   |    Fecha    | Cod. Articulo |        Vendedor        |  Sucursal  |   Cantidad   |    Importe    |")
-    print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
-    for ventas in lista:
-            numfac = ventas.NumeroFactura
-            fecha = ventas.Fecha
-            codigo = ventas.CodigoArticulo.Codigo
-            vendedor = ventas.Vendedor
-            sucursal = ventas.Sucursal
-            cantidad = ventas.Cantidad
-            importe = ventas.ImporteVendido
-            cadena = "| {:<16}| {:<12}| {:<14}| {:<23}| {:<11}| {:<13}| ${:<13}|".format(numfac, fecha, codigo, vendedor,sucursal,cantidad,importe)
-            print(cadena)
-    print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
     criterio = lista[fin+1].Sucursal
     for i in range(fin+1, tamanio):
         min = i
@@ -594,8 +580,56 @@ def OrdenarVentas(lista):
             print(cadena)
     print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
     return lista
+def ImprimirReporte():
+    TotalGral = 0
+    ListaOrdenada = OrdenarVentas(ListarVentas())
+    tamanio = len(ListaOrdenada)
+    subtotalvendedor = 0
+    subtotalarticulo = 0
+    subtotalsucursal = 0
+    criterio1 = ListaOrdenada[0].Sucursal
+    criterio2 = ListaOrdenada[0].CodigoArticulo.Codigo
+    criterio3 = ListaOrdenada[0].Vendedor
+    i = 0
+    while i < len(ListaOrdenada):
+        while ListaOrdenada[i].Sucursal == criterio1:
+            while ListaOrdenada[i].CodigoArticulo.Codigo == criterio2:
+                while ListaOrdenada[i].Vendedor == criterio3:
+                    subtotalvendedor += ListaOrdenada[i].ImporteVendido
+                    if i+1 < len(ListaOrdenada):
+                        i=i+1
+                    else:
+                        break
+                criterio3 = ListaOrdenada[i].Vendedor
+                subtotalarticulo += subtotalvendedor
+                print(subtotalvendedor)
+                subtotalvendedor = 0
+                if i+1 == len(ListaOrdenada):
+                    subtotalvendedor = ListaOrdenada[i].ImporteVendido
+                    subtotalarticulo += subtotalvendedor
+                    print(subtotalvendedor)
+                    break
+            criterio2 = ListaOrdenada[i].CodigoArticulo.Codigo
+            subtotalsucursal += subtotalarticulo
+            print(subtotalarticulo)
+            subtotalarticulo = 0
+            if i+1 == len(ListaOrdenada):
+                break
+        criterio1 = ListaOrdenada[i].Sucursal
+        print(subtotalsucursal)
+        TotalGral += subtotalsucursal
+        subtotalsucursal = 0
+        if i+1 == len(ListaOrdenada):
+            break
+    print(TotalGral)
+
+       
+
+
+
+
+
 ImprimirVentas()
 ImprimirArticulos()
-OrdenarVentas(ListarVentas())
-
+ImprimirReporte()
 MenuPrincipal()
