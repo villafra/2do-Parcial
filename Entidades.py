@@ -23,7 +23,7 @@ class Venta:
         self.Cantidad = cantidad
         self.CalcularTotalVenta(cantidad)
     def CalcularTotalVenta(self,cantidad):
-        self.ImporteVendido =  self.CodigoArticulo.CostoUnitario * cantidad
+        self.ImporteVendido =  round(self.CodigoArticulo.CostoUnitario * cantidad,2)
     def CalcularNumeroFactura(self):
         try:
             factura = open("NumeroFactura.dat", "r")

@@ -72,12 +72,13 @@ def MenuVentas():
     print("1-Nueva Venta")
     print("2-Modificar Venta")
     print("3-Eliminar Venta")
-    print("4-Ir Al Menu Principal")
+    print("4-Listar Ventas")
+    print("5-Ir Al Menu Principal")
     try:
         menu2= int(input())
     except ValueError:
             MenuVentas()
-    while menu2 < 5:
+    while menu2 < 6:
         if menu2 == 1:
             ImprimirArticulos()
             NuevaVenta()
@@ -89,6 +90,9 @@ def MenuVentas():
             EliminarVenta()
             break
         elif menu2 == 4:
+            ImprimirVentas()
+            break
+        elif menu2 == 5:
             MenuPrincipal()
             break
     else:
@@ -128,16 +132,14 @@ def AltaArticulo():
             RegistrarArticulo.write(f"{NuevoArticulo.Codigo},{NuevoArticulo.Descripcion},{NuevoArticulo.Stock},{NuevoArticulo.CostoUnitario}\n")
             RegistrarArticulo.close()
             print(f"Se registrado: {NuevoArticulo}")
-            MenuArticulos()
         elif opcion1 == 2:
             RegistrarArticulo.close()
             print("Se ha cancelado la operacion.")
-            MenuArticulos()
         else:
             print("Solo puede elegir entre 1 o 2")
-            MenuArticulos()
     except:
         print("Formato de opcion incorrecto, se cancela la operacion.")
+    finally:
         MenuArticulos()
 
 def ModificarArticulo():
@@ -189,17 +191,17 @@ def ModificarListaArticulos():
 def ImprimirArticulos():
     imprimir = ListarArticulos()
     if imprimir:
-        print("+---------------------+-----------------------------------------+----------------------+----------------------+")
-        print("|       Codigo        |               Descripcion               |         Stock        |     Costo Unitario   |")
-        print("+---------------------+-----------------------------------------+----------------------+----------------------+")
+        print("+---------------------+-----------------------------------------------+----------------------+-----------------------+")
+        print("|       Codigo        |                  Descripcion                  |         Stock        |     Costo Unitario    |")
+        print("+---------------------+-----------------------------------------------+----------------------+-----------------------+")
         for articulos in imprimir:
             Codigo = articulos.Codigo
             Descripcion = articulos.Descripcion
             Stock = articulos.Stock
             CostoUnitario = articulos.CostoUnitario
-            cadena = "| {:<20}| {:<40}| {:<21}| ${:<20}|".format(Codigo, Descripcion, Stock, CostoUnitario)
+            cadena = "| {:<20}| {:<46}| {:<21}| ${:<21}|".format(Codigo, Descripcion, Stock, CostoUnitario)
             print(cadena)
-        print("+---------------------+-----------------------------------------+----------------------+----------------------+\n")
+        print("+---------------------+-----------------------------------------------+----------------------+-----------------------+\n")
 
 def BuscarArticulo(Codigo):
     DevolverArticulo = False
@@ -360,13 +362,12 @@ def NuevaVenta():
             RegistrarVenta.write(f"{venta.NumeroFactura},{venta.Fecha},{venta.CodigoArticulo.Codigo},{venta.Vendedor},{venta.Sucursal},{venta.Cantidad},{venta.ImporteVendido}\n")
             RegistrarVenta.close()
             print(f"Se ha registrado: {venta}")
-            MenuVentas()
         elif opcion4 == 2:
             print("Se ha cancelado la operacion.")
             RegistrarVenta.close()
-            MenuVentas()
     except:
         print("Formato de opcion incorrecto, se cancela la operacion")
+    finally:
         MenuVentas()
 
 def ModificarListaVentas():
@@ -465,9 +466,9 @@ def ListarVentas():
 def ImprimirVentas():
     imprimir = ListarVentas()
     if imprimir:
-        print("+-----------------+-------------+---------------+-------------------+------------+---------------+---------------+")
-        print("|   Nro Factura   |    Fecha    | Cod. Articulo |      Vendedor     |  Sucursal  |    Cantidad   |    Importe    |")
-        print("+-----------------+-------------+---------------+-------------------+------------+---------------+---------------+")
+        print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
+        print("|   Nro Factura   |    Fecha    | Cod. Articulo |        Vendedor        |  Sucursal  |   Cantidad   |    Importe    |")
+        print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
         for ventas in imprimir:
             numfac = ventas.NumeroFactura
             fecha = ventas.Fecha
@@ -476,9 +477,9 @@ def ImprimirVentas():
             sucursal = ventas.Sucursal
             cantidad = ventas.Cantidad
             importe = ventas.ImporteVendido
-            cadena = "| {:<16}| {:<12}| {:<14}| {:<18}| {:<11}| {:<14}| ${:<13}|".format(numfac, fecha, codigo, vendedor,sucursal,cantidad,importe)
+            cadena = "| {:<16}| {:<12}| {:<14}| {:<23}| {:<11}| {:<13}| ${:<13}|".format(numfac, fecha, codigo, vendedor,sucursal,cantidad,importe)
             print(cadena)
-        print("+-----------------+-------------+---------------+-------------------+------------+---------------+---------------+")
+        print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
         
 def EliminarVenta():
     print("Ingrese numero de Factura a Eliminar:")
@@ -491,6 +492,9 @@ def EliminarVenta():
         print("2-NO")
         try:
             opcion5 = int(input())
+        except:
+            print("Formato de opcion incorrecto. Se cancela la operacion.")
+            EliminarVenta()
             if opcion5 == 1:
                 indice = ListadoVentas.index(killfactura)
                 ListadoVentas.pop(indice)
@@ -506,7 +510,92 @@ def EliminarVenta():
             else:
                 print("Solo puede elegir entre 1 o 2")
                 EliminarVenta()
-        except:
-            EliminarVenta()
+def OrdenarVentas(lista):
+    tamanio = len(lista)
+    for i in range(0,tamanio):
+        min = i
+        for j in range(i + 1 ,tamanio):
+            if lista[min].Sucursal > lista[j].Sucursal:
+                min = j
+        aux = lista[i]
+        lista[i] = lista[min]
+        lista[min] = aux
+    criterio = lista[0].Sucursal
+    fin = 0
+    for i in range(0,tamanio):
+        if lista[i].Sucursal == criterio:
+            fin = i
+    for i in range(0,fin):
+        min = i
+        for j in range (i + 1,fin+1):
+            if lista[min].CodigoArticulo.Codigo > lista[j].CodigoArticulo.Codigo:
+                if lista[j].Sucursal == criterio:
+                    min = j
+        aux = lista[i]
+        lista[i] = lista[min]
+        lista[min] = aux
+    print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
+    print("|   Nro Factura   |    Fecha    | Cod. Articulo |        Vendedor        |  Sucursal  |   Cantidad   |    Importe    |")
+    print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
+    for ventas in lista:
+            numfac = ventas.NumeroFactura
+            fecha = ventas.Fecha
+            codigo = ventas.CodigoArticulo.Codigo
+            vendedor = ventas.Vendedor
+            sucursal = ventas.Sucursal
+            cantidad = ventas.Cantidad
+            importe = ventas.ImporteVendido
+            cadena = "| {:<16}| {:<12}| {:<14}| {:<23}| {:<11}| {:<13}| ${:<13}|".format(numfac, fecha, codigo, vendedor,sucursal,cantidad,importe)
+            print(cadena)
+    print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
+    criterio = lista[fin+1].Sucursal
+    for i in range(fin+1, tamanio):
+        min = i
+        for j in range (i + 1,tamanio):
+            if lista[min].CodigoArticulo.Codigo > lista[j].CodigoArticulo.Codigo:
+                if lista[j].Sucursal == criterio:
+                    min = j
+        aux = lista[i]
+        lista[i] = lista[min]
+        lista[min] = aux
+    criterio = lista[0].Sucursal
+    criterio1 = lista[0].CodigoArticulo.Codigo
+    for i in range(0,tamanio):
+        min = i
+        if lista[i].Sucursal and lista[i].CodigoArticulo.Codigo == criterio1:
+            for j in range (i + 1,tamanio):
+                if lista[min].Vendedor > lista[j].Vendedor:
+                    if lista[j].Sucursal == criterio and lista[j].CodigoArticulo.Codigo == criterio1:
+                        min = j
+            aux = lista[i]
+            lista[i] = lista[min]
+            lista[min] = aux
+        else:
+            criterio = lista[i].Sucursal
+            criterio1 = lista[i].CodigoArticulo.Codigo
+            if lista[j-1].Vendedor > lista[j].Vendedor:
+                    if lista[j].Sucursal == criterio and lista[j].CodigoArticulo.Codigo == criterio1:
+                        min = j
+            aux = lista[i]
+            lista[i] = lista[min]
+            lista[min] = aux
+    print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
+    print("|   Nro Factura   |    Fecha    | Cod. Articulo |        Vendedor        |  Sucursal  |   Cantidad   |    Importe    |")
+    print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
+    for ventas in lista:
+            numfac = ventas.NumeroFactura
+            fecha = ventas.Fecha
+            codigo = ventas.CodigoArticulo.Codigo
+            vendedor = ventas.Vendedor
+            sucursal = ventas.Sucursal
+            cantidad = ventas.Cantidad
+            importe = ventas.ImporteVendido
+            cadena = "| {:<16}| {:<12}| {:<14}| {:<23}| {:<11}| {:<13}| ${:<13}|".format(numfac, fecha, codigo, vendedor,sucursal,cantidad,importe)
+            print(cadena)
+    print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
+    return lista
 ImprimirVentas()
+ImprimirArticulos()
+OrdenarVentas(ListarVentas())
+
 MenuPrincipal()
