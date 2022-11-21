@@ -590,38 +590,64 @@ def ImprimirReporte():
     criterio1 = ListaOrdenada[0].Sucursal
     criterio2 = ListaOrdenada[0].CodigoArticulo.Codigo
     criterio3 = ListaOrdenada[0].Vendedor
+    imprimirSucursal = criterio1
+    imprimirArticulo = criterio2
+    imprimirVendedor = criterio3
     i = 0
+    print("+----------+------------------------+----------------------+---------------+---------------+---------------+----------+")
+    print("| Sucursal |  Articulo Descripcion  |       Vendedor       | Subt Vendedor | Subt Articulo | Subt Sucursal |  Total   |")
+    print("+----------+------------------------+----------------------+---------------+---------------+---------------+----------+")
+    cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format(imprimirSucursal,"","","","","","")
+    print(cadena)
+    cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format("",BuscarArticulo(imprimirArticulo).Descripcion,"","","","","")
+    print(cadena)
     while i < len(ListaOrdenada):
         while ListaOrdenada[i].Sucursal == criterio1:
-            while ListaOrdenada[i].CodigoArticulo.Codigo == criterio2:
+            if imprimirSucursal != criterio1:
+                imprimirSucursal = criterio1
+                cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format(imprimirSucursal,"","","","","","")
+                print(cadena)
+            while ListaOrdenada[i].CodigoArticulo.Codigo == criterio2:              
                 while ListaOrdenada[i].Vendedor == criterio3:
                     subtotalvendedor += ListaOrdenada[i].ImporteVendido
                     if i+1 < len(ListaOrdenada):
                         i=i+1
                     else:
                         break
+                imprimirVendedor = criterio3
                 criterio3 = ListaOrdenada[i].Vendedor
                 subtotalarticulo += subtotalvendedor
-                print(subtotalvendedor)
+                cadena = "| {:<9}| {:<23}| {:<21}| ${:<13}| {:<14}| {:<14}| {:<9}|".format("","",imprimirVendedor,subtotalvendedor,"","","")
+                print(cadena)
                 subtotalvendedor = 0
                 if i+1 == len(ListaOrdenada):
+                    imprimirVendedor = criterio3
                     subtotalvendedor = ListaOrdenada[i].ImporteVendido
+                    cadena = "| {:<9}| {:<23}| {:<21}| ${:<13}| {:<14}| {:<14}| {:<9}|".format("","",imprimirVendedor,subtotalvendedor,"","","")
+                    print(cadena)
                     subtotalarticulo += subtotalvendedor
-                    print(subtotalvendedor)
                     break
             criterio2 = ListaOrdenada[i].CodigoArticulo.Codigo
             subtotalsucursal += subtotalarticulo
-            print(subtotalarticulo)
+            imprimirArticulo = criterio2
+            cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| ${:<13}| {:<14}| {:<9}|".format("","","","",subtotalarticulo,"","")
+            print(cadena)
+            if i+1 <len(ListaOrdenada):
+                cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format("",BuscarArticulo(imprimirArticulo).Descripcion,"","","","","")
+                print(cadena)
             subtotalarticulo = 0
             if i+1 == len(ListaOrdenada):
                 break
-        criterio1 = ListaOrdenada[i].Sucursal
-        print(subtotalsucursal)
+        if imprimirSucursal == criterio1:
+            criterio1 = ListaOrdenada[i].Sucursal
+        cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| ${:<13}| {:<9}|".format(imprimirSucursal,"","","","",subtotalsucursal,"")
+        print(cadena)
         TotalGral += subtotalsucursal
         subtotalsucursal = 0
         if i+1 == len(ListaOrdenada):
             break
-    print(TotalGral)
+    cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}|${:<5}|".format("","","","","","",TotalGral)
+    print(cadena)
 
        
 
