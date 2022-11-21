@@ -593,13 +593,12 @@ def ImprimirReporte():
     imprimirSucursal = criterio1
     imprimirArticulo = criterio2
     imprimirVendedor = criterio3
+    stop = False
     i = 0
     print("+----------+------------------------+----------------------+---------------+---------------+---------------+----------+")
     print("| Sucursal |  Articulo Descripcion  |       Vendedor       | Subt Vendedor | Subt Articulo | Subt Sucursal |  Total   |")
     print("+----------+------------------------+----------------------+---------------+---------------+---------------+----------+")
     cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format(imprimirSucursal,"","","","","","")
-    print(cadena)
-    cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format("",BuscarArticulo(imprimirArticulo).Descripcion,"","","","","")
     print(cadena)
     while i < len(ListaOrdenada):
         while ListaOrdenada[i].Sucursal == criterio1:
@@ -607,6 +606,10 @@ def ImprimirReporte():
                 imprimirSucursal = criterio1
                 cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format(imprimirSucursal,"","","","","","")
                 print(cadena)
+            if i+1 <len(ListaOrdenada):
+               if ListaOrdenada[i+1].Sucursal != imprimirArticulo:
+                        cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format("",BuscarArticulo(imprimirArticulo).Descripcion,"","","","","")
+                        print(cadena) 
             while ListaOrdenada[i].CodigoArticulo.Codigo == criterio2:              
                 while ListaOrdenada[i].Vendedor == criterio3:
                     subtotalvendedor += ListaOrdenada[i].ImporteVendido
@@ -632,16 +635,13 @@ def ImprimirReporte():
             imprimirArticulo = criterio2
             cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| ${:<13}| {:<14}| {:<9}|".format("","","","",subtotalarticulo,"","")
             print(cadena)
-            if i+1 <len(ListaOrdenada):
-                cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format("",BuscarArticulo(imprimirArticulo).Descripcion,"","","","","")
-                print(cadena)
             subtotalarticulo = 0
             if i+1 == len(ListaOrdenada):
                 break
-        if imprimirSucursal == criterio1:
-            criterio1 = ListaOrdenada[i].Sucursal
         cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| ${:<13}| {:<9}|".format(imprimirSucursal,"","","","",subtotalsucursal,"")
         print(cadena)
+        if imprimirSucursal == criterio1:
+            criterio1 = ListaOrdenada[i].Sucursal
         TotalGral += subtotalsucursal
         subtotalsucursal = 0
         if i+1 == len(ListaOrdenada):
