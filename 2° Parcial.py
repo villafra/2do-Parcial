@@ -1,5 +1,6 @@
 from fileinput import close
 import re
+import sys
 from Entidades import *
 import os
 
@@ -27,7 +28,7 @@ def MenuPrincipal():
            break
        elif opcion == 3:
            print("El programa ha finalizado correctamente.")
-           exit()
+           raise SystemExit
    else:
         MenuPrincipal() 
 
@@ -122,13 +123,13 @@ def AltaArticulo():
     print("1-SI")
     print("2-NO")
     try:
-        opcion = int(input())
-        if opcion == 1:
+        opcion1 = int(input())
+        if opcion1 == 1:
             RegistrarArticulo.write(f"{NuevoArticulo.Codigo},{NuevoArticulo.Descripcion},{NuevoArticulo.Stock},{NuevoArticulo.CostoUnitario}\n")
             RegistrarArticulo.close()
             print(f"Se registrado: {NuevoArticulo}")
             MenuArticulos()
-        elif opcion == 2:
+        elif opcion1 == 2:
             RegistrarArticulo.close()
             print("Se ha cancelado la operacion.")
             MenuArticulos()
@@ -183,7 +184,7 @@ def ModificarListaArticulos():
         os.rename("auxArticulos.dat","ListadoArticulos.txt")
         return True
     except:
-        return false
+        return False
    
 def ImprimirArticulos():
     imprimir = ListarArticulos()
@@ -232,8 +233,8 @@ def EliminarArticulo():
         print("1-SI")
         print("2-NO")
         try:
-            opcion = int(input())
-            if opcion == 1:
+            opcion2 = int(input())
+            if opcion2 == 1:
                 indice = ListadoArticulos.index(killArticulo)
                 ListadoArticulos.pop(indice)
                 if ModificarListaArticulos():
@@ -242,7 +243,7 @@ def EliminarArticulo():
                 else:
                     print(f"No se pudo borrar el articulo {killArticulo}. Por favor, intente nuevamente")
                     EliminarArticulo()
-            elif opcion == 2:
+            elif opcion2 == 2:
                 print("Eliminar articulo, cancelado.")
                 MenuArticulos()
             else:
@@ -257,6 +258,35 @@ def ValidarCodigoArticulo(Codigo):
         return True
     else:
         return False
+def ValidarSucursal(Sucursal):
+    formato = re.compile(r"[A-Z]{3}[0-9]{3}")
+    if re.fullmatch(formato, Sucursal):
+        return True
+    else:
+        return False
+def ValidarFormatoFecha(fecha):
+    formato = re.compile(r"([0-2]\d|3[01])/(0\d|1[0-2])/([12]\d{3})")
+    if re.fullmatch(formato, fecha):
+        separar = fecha.split("/")
+        if VerificarFecha(int(separar[0]),int(separar[1]),int(separar[2])):
+            return True
+        else:
+            return False
+    else:
+        return False
+def VerificarFecha(dia, mes, anio):
+    Meses = {4: 30, 6: 30, 9: 30, 11: 30, 2: 28}
+    diasxmes = Meses.get(mes, 31)
+    if diasxmes == 28:
+        if anio % 4 == 0:
+            if anio % 100 == 0:
+                if anio % 400 == 0:
+                    diasxmes = 29
+            else:
+                diasxmes = 29
+    if dia <= diasxmes:
+        return True
+    return False
 
 def AgregarStock():
     print("Ingrese Codigo de Articulo para agregar Stock:")
@@ -268,8 +298,8 @@ def AgregarStock():
         print("1-SI")
         print("2-NO")
         try:
-            opcion = int(input())
-            if opcion == 1:
+            opcion3 = int(input())
+            if opcion3 == 1:
                 print("Ingrese cantidad:")
                 cantidad = int(input())
                 agregarstock.AgregarStock(cantidad)
@@ -281,7 +311,7 @@ def AgregarStock():
                 else:
                     print("No se pudo actualizar el stock, por favor intente nuevamente.")
                     AgregarStock()
-            elif opcion == 2:
+            elif opcion3 == 2:
                 print("Se ha cancelado la operacion.")
                 MenuArticulos()
             else:
@@ -311,21 +341,27 @@ def NuevaVenta():
     vendedor = input()
     print("Ingrese sucursal:")
     sucursal = input()
-    print("Ingrese Fecha de Venta:")
+    if not ValidarSucursal(sucursal):
+        print("El formato de sucursal no es correcto.Intente nuevamente.")
+        NuevaVenta()
+    print("Ingrese Fecha de Venta (formato dd/mm/yyyy):")
     fecha = input()
+    if not ValidarFormatoFecha(fecha):
+        print("El formato de fecha no es correcto.Intente nuevamente.")
+        NuevaVenta()
     RegistrarVenta = open("ListadoVentas.txt","a")
     venta = Venta(fecha, articulo, vendedor, sucursal, cantidad)
     print(f"Se va a registrar: {venta} por un importe de: {round(venta.ImporteVendido,2)}, desea continuar?")
     print("1-SI")
     print("2-NO")
     try:
-        opcion = int(input())
-        if opcion == 1:
+        opcion4 = int(input())
+        if opcion4 == 1:
             RegistrarVenta.write(f"{venta.NumeroFactura},{venta.Fecha},{venta.CodigoArticulo.Codigo},{venta.Vendedor},{venta.Sucursal},{venta.Cantidad},{venta.ImporteVendido}\n")
             RegistrarVenta.close()
             print(f"Se ha registrado: {venta}")
             MenuVentas()
-        elif opcion == 2:
+        elif opcion4 == 2:
             print("Se ha cancelado la operacion.")
             RegistrarVenta.close()
             MenuVentas()
@@ -343,7 +379,7 @@ def ModificarListaVentas():
         os.rename("auxVentas.dat","ListadoVentas.txt")
         return True
     except:
-        return false
+        return False
 def ModificarVenta():
     print("Ingrese Numero de Factura a Modificar:")
     numfac = input()
@@ -379,6 +415,9 @@ def ModificarVenta():
         nuevasucursal = input()
         if nuevasucursal == "":
             nuevasucursal = modVenta.Sucursal
+        elif not ValidarSucursal(nuevasucursal):
+            print ("La sucursal agregada, no tiene el formato correcto. Operacion Cancelada.")
+            NuevaVenta()
         print(f"Cantidad actual: {modVenta.Cantidad}. Ingrese nueva cantidad:")
         try:
             nuevacantidad = int(input())
@@ -426,9 +465,9 @@ def ListarVentas():
 def ImprimirVentas():
     imprimir = ListarVentas()
     if imprimir:
-        print("+-----------------+---------------+---------------+---------------+---------------+---------------+---------------+")
-        print("|   Nro Factura   |     Fecha     | Cod. Articulo |    Vendedor   |   Sucursal    |    Cantidad   |    Importe    |")
-        print("+-----------------+---------------+---------------+---------------+---------------+---------------+---------------+")
+        print("+-----------------+-------------+---------------+-------------------+------------+---------------+---------------+")
+        print("|   Nro Factura   |    Fecha    | Cod. Articulo |      Vendedor     |  Sucursal  |    Cantidad   |    Importe    |")
+        print("+-----------------+-------------+---------------+-------------------+------------+---------------+---------------+")
         for ventas in imprimir:
             numfac = ventas.NumeroFactura
             fecha = ventas.Fecha
@@ -437,9 +476,9 @@ def ImprimirVentas():
             sucursal = ventas.Sucursal
             cantidad = ventas.Cantidad
             importe = ventas.ImporteVendido
-            cadena = "| {:<16}| {:<14}| {:<14}| {:<14}| {:<14}| {:<14}| ${:<13}|".format(numfac, fecha, codigo, vendedor,sucursal,cantidad,importe)
+            cadena = "| {:<16}| {:<12}| {:<14}| {:<18}| {:<11}| {:<14}| ${:<13}|".format(numfac, fecha, codigo, vendedor,sucursal,cantidad,importe)
             print(cadena)
-        print("+-----------------+---------------+---------------+---------------+---------------+---------------+---------------+")
+        print("+-----------------+-------------+---------------+-------------------+------------+---------------+---------------+")
         
 def EliminarVenta():
     print("Ingrese numero de Factura a Eliminar:")
@@ -451,8 +490,8 @@ def EliminarVenta():
         print("1-SI")
         print("2-NO")
         try:
-            opcion = int(input())
-            if opcion == 1:
+            opcion5 = int(input())
+            if opcion5 == 1:
                 indice = ListadoVentas.index(killfactura)
                 ListadoVentas.pop(indice)
                 if ModificarListaVentas():
@@ -461,7 +500,7 @@ def EliminarVenta():
                 else:
                     print(f"No se pudo borrar la venta {killfactura}. Por favor, intente nuevamente")
                     EliminarVenta()
-            elif opcion == 2:
+            elif opcion5 == 2:
                 print("Eliminar venta, cancelado.")
                 MenuVentas()
             else:
