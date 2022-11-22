@@ -12,14 +12,15 @@ def MenuPrincipal():
    print ("Por favor elija un item del menu:")
    print ("1-Articulos")
    print ("2-Ventas")
-   print ("3-Salir")
+   print ("3-Corte de Control")
+   print ("4-Salir")
 
    try:
     opcion = int(input())
    except ValueError:
        MenuPrincipal()
     
-   while opcion < 4:
+   while opcion < 5:
        if opcion == 1:
            MenuArticulos()
            break
@@ -27,6 +28,9 @@ def MenuPrincipal():
            MenuVentas()
            break
        elif opcion == 3:
+           ImprimirReporte()
+           break
+       elif opcion == 4:
            print("El programa ha finalizado correctamente.")
            raise SystemExit
    else:
@@ -634,6 +638,11 @@ def ImprimirReporte():
                 print(cadena)
                 subtotalvendedor = 0
                 if i+1 == len(ListaOrdenada):
+                    if criterio2 != ListaOrdenada[i].CodigoArticulo.Codigo:
+                        criterio2 = ListaOrdenada[i].CodigoArticulo.Codigo
+                        imprimirArticulo = criterio2
+                        cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format("",BuscarArticulo(imprimirArticulo).Descripcion,"","","","","")
+                        print(cadena) 
                     imprimirVendedor = criterio3
                     subtotalvendedor = ListaOrdenada[i].ImporteVendido
                     cadena = "| {:<9}| {:<23}| {:<21}| ${:<13}| {:<14}| {:<14}| {:<9}|".format("","",imprimirVendedor,subtotalvendedor,"","","")
@@ -659,13 +668,4 @@ def ImprimirReporte():
     cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}|${:<5}|".format("","","","","","",TotalGral)
     print(cadena)
 
-       
-
-
-
-
-
-ImprimirVentas()
-ImprimirArticulos()
-ImprimirReporte()
 MenuPrincipal()
