@@ -521,29 +521,41 @@ def OrdenarVentas(lista):
         lista[i] = lista[min]
         lista[min] = aux
     criterio = lista[0].Sucursal
+    inicio = 0
     fin = 0
+    enlazarSucur = []
     for i in range(0,tamanio):
         if lista[i].Sucursal == criterio:
-            fin = i
-    for i in range(0,fin):
-        min = i
-        for j in range (i + 1,fin+1):
-            if lista[min].CodigoArticulo.Codigo > lista[j].CodigoArticulo.Codigo:
-                if lista[j].Sucursal == criterio:
-                    min = j
-        aux = lista[i]
-        lista[i] = lista[min]
-        lista[min] = aux
-    criterio = lista[fin+1].Sucursal
-    for i in range(fin+1, tamanio):
-        min = i
-        for j in range (i + 1,tamanio):
-            if lista[min].CodigoArticulo.Codigo > lista[j].CodigoArticulo.Codigo:
-                if lista[j].Sucursal == criterio:
-                    min = j
-        aux = lista[i]
-        lista[i] = lista[min]
-        lista[min] = aux
+            fin += 1
+        else:
+            criterio = lista[i].Sucursal
+            enlazarSucur.append(fin)
+            fin+=1
+    enlazarSucur.append(tamanio)
+    control = len(enlazarSucur)
+    contador = 2
+    criterio = lista[0].Sucursal
+    for x in enlazarSucur:
+        for i in range(inicio, x):
+            min = i
+            for j in range (i + 1,x):
+                if lista[min].CodigoArticulo.Codigo > lista[j].CodigoArticulo.Codigo:
+                    if lista[j].Sucursal == criterio:
+                        min = j
+            if i + 1 == tamanio:
+                if lista[min].CodigoArticulo.Codigo > lista[j].CodigoArticulo.Codigo:
+                    if lista[j].Sucursal == criterio:
+                        min = j
+            aux = lista[i]
+            lista[i] = lista[min]
+            lista[min] = aux
+        if contador < control:
+            inicio = x+1
+        else:
+            inicio = x
+        if x+1 < fin:
+            criterio = lista[x+1].Sucursal
+            contador +=1
     criterio = lista[0].Sucursal
     criterio1 = lista[0].CodigoArticulo.Codigo
     for i in range(0,tamanio):
@@ -583,7 +595,6 @@ def OrdenarVentas(lista):
 def ImprimirReporte():
     TotalGral = 0
     ListaOrdenada = OrdenarVentas(ListarVentas())
-    tamanio = len(ListaOrdenada)
     subtotalvendedor = 0
     subtotalarticulo = 0
     subtotalsucursal = 0
@@ -593,7 +604,6 @@ def ImprimirReporte():
     imprimirSucursal = criterio1
     imprimirArticulo = criterio2
     imprimirVendedor = criterio3
-    stop = False
     i = 0
     print("+----------+------------------------+----------------------+---------------+---------------+---------------+----------+")
     print("| Sucursal |  Articulo Descripcion  |       Vendedor       | Subt Vendedor | Subt Articulo | Subt Sucursal |  Total   |")
