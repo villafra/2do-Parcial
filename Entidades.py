@@ -7,6 +7,16 @@ class Articulo:
         self.CostoUnitario = costounitario
     def AgregarStock(self, cantidad):
         self.Stock += cantidad
+    def DescontarStock(self,cantidad):
+        self.Stock -= cantidad
+        if self.Stock < 0:
+            self.Stock += cantidad
+            return False
+        else:
+            return True
+    def ComprobarStock(self, cantidad):
+        booleano = self.Stock - cantidad 
+        return booleano >= 0
     def __str__(self):
         return f"{self.Codigo} - {self.Descripcion}"
 

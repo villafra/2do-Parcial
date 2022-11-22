@@ -103,48 +103,51 @@ def MenuVentas():
         MenuVentas()
 
 def AltaArticulo():
-    print("Ingrese Codigo del nuevo Articulo:")
+    print("Ingrese Codigo del nuevo Articulo (presione 0, para salir):")
     codigo = input()
-    if not ValidarCodigoArticulo(codigo):
-        print("El formato no es correcto. Por favor ingrese nuevamente en formato X000-")
-        AltaArticulo()
-    if BuscarArticulo(codigo):
-        print("El codigo de articulo ya existe en la base de datos. Por favor intente nuevamente.")
-        AltaArticulo()
-    print ("Ingrese descripcion del nuevo Articulo:")
-    descripcion = input()
-    print ("Ingrese Stock Inicial:")
-    try:
-        stock = int(input())
-    except ValueError:
-        print("Por favor ingrese cantidad en numeros solamente. Operacion Cancelada")
-        AltaArticulo()
-    print ("Ingrese Costo Unitario:")
-    try:
-        costo = float(input())
-    except ValueError:
-        print("Por favor ingrese Costo en numeros solamente. Operacion Cancelada")
-        AltaArticulo()
-    RegistrarArticulo = open("ListadoArticulos.txt", "a")
-    NuevoArticulo = Articulo(codigo, descripcion, stock, costo)
-    print(f"Se va a registrar: {NuevoArticulo.Codigo},{NuevoArticulo.Descripcion},{NuevoArticulo.Stock},{NuevoArticulo.CostoUnitario}.\n Desea continuar?")
-    print("1-SI")
-    print("2-NO")
-    try:
-        opcion1 = int(input())
-        if opcion1 == 1:
-            RegistrarArticulo.write(f"{NuevoArticulo.Codigo},{NuevoArticulo.Descripcion},{NuevoArticulo.Stock},{NuevoArticulo.CostoUnitario}\n")
-            RegistrarArticulo.close()
-            print(f"Se registrado: {NuevoArticulo}")
-        elif opcion1 == 2:
-            RegistrarArticulo.close()
-            print("Se ha cancelado la operacion.")
-        else:
-            print("Solo puede elegir entre 1 o 2")
-    except:
-        print("Formato de opcion incorrecto, se cancela la operacion.")
-    finally:
+    if codigo ==str(0):
         MenuArticulos()
+    else:
+        if not ValidarCodigoArticulo(codigo):
+            print("El formato no es correcto. Por favor ingrese nuevamente en formato X000-")
+            AltaArticulo()
+        if BuscarArticulo(codigo):
+            print("El codigo de articulo ya existe en la base de datos. Por favor intente nuevamente.")
+            AltaArticulo()
+        print ("Ingrese descripcion del nuevo Articulo:")
+        descripcion = input()
+        print ("Ingrese Stock Inicial:")
+        try:
+            stock = int(input())
+        except ValueError:
+            print("Por favor ingrese cantidad en numeros solamente. Operacion Cancelada")
+            AltaArticulo()
+        print ("Ingrese Costo Unitario:")
+        try:
+            costo = float(input())
+        except ValueError:
+            print("Por favor ingrese Costo en numeros solamente. Operacion Cancelada")
+            AltaArticulo()
+        RegistrarArticulo = open("ListadoArticulos.txt", "a")
+        NuevoArticulo = Articulo(codigo, descripcion, stock, costo)
+        print(f"Se va a registrar: {NuevoArticulo.Codigo},{NuevoArticulo.Descripcion},{NuevoArticulo.Stock},{NuevoArticulo.CostoUnitario}.\n Desea continuar?")
+        print("1-SI")
+        print("2-NO")
+        try:
+            opcion1 = int(input())
+            if opcion1 == 1:
+                RegistrarArticulo.write(f"{NuevoArticulo.Codigo},{NuevoArticulo.Descripcion},{NuevoArticulo.Stock},{NuevoArticulo.CostoUnitario}\n")
+                RegistrarArticulo.close()
+                print(f"Se registrado: {NuevoArticulo}")
+            elif opcion1 == 2:
+                RegistrarArticulo.close()
+                print("Se ha cancelado la operacion.")
+            else:
+                print("Solo puede elegir entre 1 o 2")
+        except:
+            print("Formato de opcion incorrecto, se cancela la operacion.")
+        finally:
+            MenuArticulos()
 
 def ModificarArticulo():
     print("Ingrese Codigo de Articulo a Modificar:")
@@ -221,7 +224,7 @@ def ListarArticulos():
         ListadoArticulos.clear()
         for articulo in Listado:
             armaarticulo = articulo.split(",")
-            AgregarArticulo = Articulo(armaarticulo[0], armaarticulo[1], int(armaarticulo[2]),float(armaarticulo[3]))
+            AgregarArticulo = Articulo(armaarticulo[0], armaarticulo[1], int(armaarticulo[2]),round(float(armaarticulo[3]),2))
             ListadoArticulos.append(AgregarArticulo)
         return ListadoArticulos
     except:
@@ -257,6 +260,9 @@ def EliminarArticulo():
                 EliminarArticulo()
         except:
             EliminarArticulo()
+    else:
+        print("El codigo de Articulo seleccionado es inexistente. Por favor, intente nuevamente.")
+        MenuArticulos()
 
 def ValidarCodigoArticulo(Codigo):
     formato = re.compile(r"[A-Z]{1}[0-9]{3}")
@@ -264,12 +270,14 @@ def ValidarCodigoArticulo(Codigo):
         return True
     else:
         return False
+
 def ValidarSucursal(Sucursal):
-    formato = re.compile(r"[A-Z]{3}[0-9]{3}")
+    formato = re.compile(r"SUC[0-9]{3}")
     if re.fullmatch(formato, Sucursal):
         return True
     else:
         return False
+
 def ValidarFormatoFecha(fecha):
     formato = re.compile(r"([0-2]\d|3[01])/(0\d|1[0-2])/([12]\d{3})")
     if re.fullmatch(formato, fecha):
@@ -280,6 +288,7 @@ def ValidarFormatoFecha(fecha):
             return False
     else:
         return False
+
 def VerificarFecha(dia, mes, anio):
     Meses = {4: 30, 6: 30, 9: 30, 11: 30, 2: 28}
     diasxmes = Meses.get(mes, 31)
@@ -293,6 +302,24 @@ def VerificarFecha(dia, mes, anio):
     if dia <= diasxmes:
         return True
     return False
+
+def DescontarStock(articulo, cantidad):
+    if articulo.DescontarStock(cantidad):
+        indice = ListadoArticulos.index(articulo)
+        ListadoArticulos[indice].Stock = articulo.Stock
+        ModificarListaArticulos()
+        return True
+    else:
+        return False
+
+def DevolverStock(articulo, cantidad):
+    articulo.AgregarStock(cantidad)
+    indice = ListadoArticulos.index(articulo)
+    ListadoArticulos[indice].Stock = articulo.Stock
+    ModificarListaArticulos()
+
+def ComprobarStock(articulo, cantidad):
+    return articulo.ComprobarStock(cantidad)
 
 def AgregarStock():
     print("Ingrese Codigo de Articulo para agregar Stock:")
@@ -331,48 +358,59 @@ def AgregarStock():
         MenuArticulos()
 
 def NuevaVenta():
-    print("Ingrese Codigo de articulo vendido:")
+    print("Ingrese Codigo de articulo vendido (presione 0 para salir):")
     codigo = input()
-    articulo = BuscarArticulo(codigo)
-    if not articulo:
-        print("El codigo de articulo no existe en la base de datos. Por favor intente nuevamente.")
-        NuevaVenta()
-    print("Ingrese Cantidad:")
-    try:
-        cantidad = int(input())
-    except ValueError:
-        print("Por favor ingrese cantidad en numeros solamente. Operacion Cancelada.")
-        NuevaVenta()
-    print("Ingrese Nombre de Vendedor:")
-    vendedor = input()
-    print("Ingrese sucursal:")
-    sucursal = input()
-    if not ValidarSucursal(sucursal):
-        print("El formato de sucursal no es correcto.Intente nuevamente.")
-        NuevaVenta()
-    print("Ingrese Fecha de Venta (formato dd/mm/yyyy):")
-    fecha = input()
-    if not ValidarFormatoFecha(fecha):
-        print("El formato de fecha no es correcto.Intente nuevamente.")
-        NuevaVenta()
-    RegistrarVenta = open("ListadoVentas.txt","a")
-    venta = Venta(fecha, articulo, vendedor, sucursal, cantidad)
-    print(f"Se va a registrar: {venta} por un importe de: {round(venta.ImporteVendido,2)}, desea continuar?")
-    print("1-SI")
-    print("2-NO")
-    try:
-        opcion4 = int(input())
-        if opcion4 == 1:
-            RegistrarVenta.write(f"{venta.NumeroFactura},{venta.Fecha},{venta.CodigoArticulo.Codigo},{venta.Vendedor},{venta.Sucursal},{venta.Cantidad},{venta.ImporteVendido}\n")
-            RegistrarVenta.close()
-            print(f"Se ha registrado: {venta}")
-        elif opcion4 == 2:
-            print("Se ha cancelado la operacion.")
-            RegistrarVenta.close()
-    except:
-        print("Formato de opcion incorrecto, se cancela la operacion")
-    finally:
-        MenuVentas()
+    if codigo == str(0):
+            MenuVentas()
+    else:
+        articulo = BuscarArticulo(codigo)
+        if not articulo:
+           print("El codigo de articulo no existe en la base de datos. Por favor intente nuevamente.")
+           NuevaVenta()
+        print("Ingrese Cantidad:")
+        try:
+            cantidad = int(input())
+        except ValueError:
+            print("Por favor ingrese cantidad en numeros solamente. Operacion Cancelada.")
+            NuevaVenta()
+        print("Ingrese Nombre de Vendedor:")
+        vendedor = input()
+        print("Ingrese sucursal:")
+        sucursal = input()
+        if not ValidarSucursal(sucursal):
+            print("El formato de sucursal no es correcto.Intente nuevamente.")
+            NuevaVenta()
+        print("Ingrese Fecha de Venta (formato dd/mm/yyyy):")
+        fecha = input()
+        if not ValidarFormatoFecha(fecha):
+            print("El formato de fecha no es correcto.Intente nuevamente.")
+            NuevaVenta()
+        RegistrarVenta = open("ListadoVentas.txt","a")
+        venta = Venta(fecha, articulo, vendedor, sucursal, cantidad)
+        print(f"Se va a registrar: {venta} por un importe de: {round(venta.ImporteVendido,2)}, desea continuar?")
+        print("1-SI")
+        print("2-NO")
+        try:
+            opcion4 = int(input())
+            if opcion4 == 1:
+                if ComprobarStock(articulo, cantidad):
+                    if DescontarStock(articulo, cantidad):
+                        RegistrarVenta.write(f"{venta.NumeroFactura},{venta.Fecha},{venta.CodigoArticulo.Codigo},{venta.Vendedor},{venta.Sucursal},{venta.Cantidad},{venta.ImporteVendido}\n")
+                        RegistrarVenta.close()
+                        print(f"Se ha registrado: {venta}")
+                    else:
+                        print("No se pudo completar la operacion. Por favor, intente nuevamente.")
+                        NuevaVenta()
+                else:
+                    print("El stock disponible no alcanza para completar la transaccion. Intente nuevamente.")
+                    NuevaVenta()
+            elif opcion4 == 2:
+                print("Se ha cancelado la operacion.")
+                RegistrarVenta.close()
+        except Exception as e:
+            print("Formato de opcion incorrecto, se cancela la operacion")
+        finally:
+            MenuVentas()
 
 def ModificarListaVentas():
     try:
@@ -386,6 +424,8 @@ def ModificarListaVentas():
     except:
         return False
 def ModificarVenta():
+    devolvercantidad = False
+    cantadevolver = 0
     print("Ingrese Numero de Factura a Modificar:")
     numfac = input()
     ListadoVentas = ListarVentas()
@@ -427,6 +467,8 @@ def ModificarVenta():
         try:
             nuevacantidad = int(input())
             modVenta.CalcularTotalVenta(nuevacantidad)
+            devolvercantidad = True
+            cantadevolver = modVenta.Cantidad
         except:
             nuevacantidad = modVenta.Cantidad
         indice = ListadoVentas.index(modVenta)
@@ -437,14 +479,17 @@ def ModificarVenta():
         ListadoVentas[indice].Sucursal = nuevasucursal
         ListadoVentas[indice].Cantidad = nuevacantidad
         if ModificarListaVentas():
+            if devolvercantidad:
+                DevolverStock(modVenta.CodigoArticulo,cantadevolver)
+                DescontarStock(nuevocodigo,nuevacantidad)
             print("La venta se ha modificado correctamente.")
             MenuVentas()
         else:
             print("La venta no pudo modificarse, por favor intente nuevamente.")
             ModificarListaVentas()
     else:
-        "La factura no existe en la base de datos."
-    MenuVentas()
+        print("La factura no existe en la base de datos.")
+        MenuVentas()
 
 def BuscarVenta(Numero):
     DevolverVenta = False
@@ -484,7 +529,8 @@ def ImprimirVentas():
             cadena = "| {:<16}| {:<12}| {:<14}| {:<23}| {:<11}| {:<13}| ${:<13}|".format(numfac, fecha, codigo, vendedor,sucursal,cantidad,importe)
             print(cadena)
         print("+-----------------+-------------+---------------+------------------------+------------+--------------+---------------+")
-        
+    MenuVentas()
+    
 def EliminarVenta():
     print("Ingrese numero de Factura a Eliminar:")
     factura = input()
@@ -499,21 +545,25 @@ def EliminarVenta():
         except:
             print("Formato de opcion incorrecto. Se cancela la operacion.")
             EliminarVenta()
-            if opcion5 == 1:
-                indice = ListadoVentas.index(killfactura)
-                ListadoVentas.pop(indice)
-                if ModificarListaVentas():
-                    print(f"La venta {killfactura} ha sido borrada de la base de datos.")
-                    MenuVentas()
-                else:
-                    print(f"No se pudo borrar la venta {killfactura}. Por favor, intente nuevamente")
-                    EliminarVenta()
-            elif opcion5 == 2:
-                print("Eliminar venta, cancelado.")
-                MenuVentas()
-            else:
-                print("Solo puede elegir entre 1 o 2")
-                EliminarVenta()
+        if opcion5 == 1:
+           indice = ListadoVentas.index(killfactura)
+           ListadoVentas.pop(indice)
+           if ModificarListaVentas():
+              DevolverStock(killfactura.CodigoArticulo, killfactura.Cantidad)
+              print(f"La venta {killfactura} ha sido borrada de la base de datos.")
+              MenuVentas()
+           else:
+              print(f"No se pudo borrar la venta {killfactura}. Por favor, intente nuevamente")
+              EliminarVenta()
+        elif opcion5 == 2:
+           print("Eliminar venta, cancelado.")
+           MenuVentas()
+        else:
+           print("Solo puede elegir entre 1 o 2")
+           EliminarVenta()
+    else:
+        print("El Nro de factura ingresado es inexiste. Por favor, intente nuevamente.")
+        MenuVentas()
 def OrdenarVentas(lista):
     tamanio = len(lista)
     for i in range(0,tamanio):
@@ -554,7 +604,7 @@ def OrdenarVentas(lista):
             lista[i] = lista[min]
             lista[min] = aux
         if contador < control:
-            inicio = x+1
+            inicio = x
         else:
             inicio = x
         if x+1 < fin:
@@ -634,30 +684,40 @@ def ImprimirReporte():
                 imprimirVendedor = criterio3
                 criterio3 = ListaOrdenada[i].Vendedor
                 subtotalarticulo += subtotalvendedor
-                cadena = "| {:<9}| {:<23}| {:<21}| ${:<13}| {:<14}| {:<14}| {:<9}|".format("","",imprimirVendedor,subtotalvendedor,"","","")
+                cadena = "| {:<9}| {:<23}| {:<21}| ${:<13}| {:<14}| {:<14}| {:<9}|".format("","",imprimirVendedor,round(subtotalvendedor,2),"","","")
                 print(cadena)
                 subtotalvendedor = 0
                 if i+1 == len(ListaOrdenada):
                     if criterio2 != ListaOrdenada[i].CodigoArticulo.Codigo:
+                        if criterio1 != ListaOrdenada[i].Sucursal:
+                            criterio1 = ListaOrdenada[i].Sucursal
+                            imprimirSucursal = criterio1
+                            cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format(imprimirSucursal,"","","","","","")
+                            print(cadena)
+                        subtotalsucursal += subtotalarticulo
+                        cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| ${:<13}| {:<14}| {:<9}|".format("","","","",round(subtotalarticulo,2),"","")
+                        print(cadena)
+                        subtotalarticulo = 0
                         criterio2 = ListaOrdenada[i].CodigoArticulo.Codigo
                         imprimirArticulo = criterio2
                         cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}| {:<9}|".format("",BuscarArticulo(imprimirArticulo).Descripcion,"","","","","")
                         print(cadena) 
                     imprimirVendedor = criterio3
                     subtotalvendedor = ListaOrdenada[i].ImporteVendido
-                    cadena = "| {:<9}| {:<23}| {:<21}| ${:<13}| {:<14}| {:<14}| {:<9}|".format("","",imprimirVendedor,subtotalvendedor,"","","")
+                    cadena = "| {:<9}| {:<23}| {:<21}| ${:<13}| {:<14}| {:<14}| {:<9}|".format("","",imprimirVendedor,round(subtotalvendedor,2),"","","")
                     print(cadena)
                     subtotalarticulo += subtotalvendedor
+                    subtotalvendedor = 0
                     break
             criterio2 = ListaOrdenada[i].CodigoArticulo.Codigo
             subtotalsucursal += subtotalarticulo
             imprimirArticulo = criterio2
-            cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| ${:<13}| {:<14}| {:<9}|".format("","","","",subtotalarticulo,"","")
+            cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| ${:<13}| {:<14}| {:<9}|".format("","","","",round(subtotalarticulo,2),"","")
             print(cadena)
             subtotalarticulo = 0
             if i+1 == len(ListaOrdenada):
                 break
-        cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| ${:<13}| {:<9}|".format(imprimirSucursal,"","","","",subtotalsucursal,"")
+        cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| ${:<13}| {:<9}|".format("","","","","",round(subtotalsucursal,2),"")
         print(cadena)
         if imprimirSucursal == criterio1:
             criterio1 = ListaOrdenada[i].Sucursal
@@ -665,7 +725,9 @@ def ImprimirReporte():
         subtotalsucursal = 0
         if i+1 == len(ListaOrdenada):
             break
-    cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}|${:<5}|".format("","","","","","",TotalGral)
+    cadena = "| {:<9}| {:<23}| {:<21}| {:<14}| {:<14}| {:<14}|${:<9}|".format("Total","","","","","",round(TotalGral,2))
     print(cadena)
+    print("+----------+------------------------+----------------------+---------------+---------------+---------------+----------+")
+    MenuPrincipal()
 
 MenuPrincipal()
